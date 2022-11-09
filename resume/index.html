@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="style/style.css">
+
+    <style type="text/css" media="print">
+        .noprint {
+            display: none
+        }
+        
+        .print {
+            display: block !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header class="el-header noprint">
+            <div class="icon-btns">
+                <i class="icon-list" @click="changeLeftMenu"></i>
+                <i class="icon-skip_previous" v-bind:class="{'disabled': currentPage == 1}" @click="changeCurrentPage('first')"></i>
+                <i class="icon-play_arrow prev-icon" v-bind:class="{'disabled': currentPage == 1}" @click="changeCurrentPage('prev')"></i>
+                <i class="icon-play_arrow" v-bind:class="{'disabled': currentPage == pageNum}" @click="changeCurrentPage('next')"></i>
+                <i class="icon-skip_next" v-bind:class="{'disabled': currentPage == pageNum}" @click="changeCurrentPage('last')"></i>
+                <select v-model="currentPage">
+                    <option v-for="page in pageNum" v-bind:value="page">page {{ page }}</option>
+                </select>
+                <i class="icon-zoom_in" v-bind:class="{'disabled': zoomNum == 2}" @click="modifyZoom('in')"></i>
+                <select v-model="zoomNum">
+                    <option value="0.5">50%</option>
+                    <option value="0.6">60%</option>
+                    <option value="0.7">70%</option>
+                    <option value="0.8">80%</option>
+                    <option value="0.9">90%</option>
+                    <option value="1.0" selected>100%</option>
+                    <option value="1.1">110%</option>
+                    <option value="1.2">120%</option>
+                    <option value="1.3">130%</option>
+                    <option value="1.4">140%</option>
+                    <option value="1.5">150%</option>
+                    <option value="1.6">160%</option>
+                    <option value="1.7">170%</option>
+                    <option value="1.8">180%</option>
+                    <option value="1.9">190%</option>
+                    <option value="2.0">200%</option>
+                </select>
+                <i class="icon-zoom_out" v-bind:class="{'disabled': zoomNum == 0.5}" @click="modifyZoom('out')"></i>
+                <i class="icon-format_align_left" @click="textAlign = 'left'"></i>
+                <i class="icon-format_align_center" @click="textAlign = 'center'"></i>
+                <i class="icon-format_align_right" @click="textAlign = 'right'"></i>
+                <i class="icon-print" @click="window.print()"></i>
+            </div>
+        </header>
+
+        <aside class="noprint" width="240px" v-show="ifMenuShow">
+            <nav class="tabNav">
+                <ul>
+                    <li v-bind:class="{ 'curr': currentNav == 0 }" @click="currentNav = 0">Page</li>
+                    <li v-bind:class="{ 'curr': currentNav == 1 }" @click="currentNav = 1">Bookmark</li>
+                </ul>
+
+                <div class="clear"></div>
+            </nav>
+
+            <div class="tab-conent scrollbar" v-bind:style="{ height: asideHeight + 'px' }">
+
+            <section v-show="currentNav == 0">
+                <ul class="page-menu">
+                    <li v-for="page in pageNum" v-bind:class="{ 'curr': currentPage == page }" @click="changePage(page)"><i class="icon-file-text2"></i> page {{ page }}</li>
+                </ul>
+            </section>
+
+            <section v-show="currentNav == 1">
+                <ul class="page-menu">
+                    <li v-for="page in pageNum" v-bind:class="{ 'curr': currentPage == page }" @click="changePage(page)"><i class="icon-turned_in_not"></i> Bookmark {{ page }}</li>
+                </ul>
+            </section>
+        </div>
+
+        </aside>
+        <div class="main scrollbar noprint"  v-bind:style="{ height: mainHeight + 'px' }" v-bind:class="{ 'mainLeftM': ifMenuShow, 'aleft': textAlign === 'left','acenter': textAlign === 'center','aright': textAlign === 'right'}">
+            <div class="conent" v-html="pageContent" v-bind:style="zoomStyle"></div>
+
+            <div class="clear"></div>
+        </div>
+
+        <!--专门只为打印的内容-->
+        <div class="conent print" style="display:none" v-html="pageContent"></div>
+    </div>
+</body>
+<!-- 先引入 Vue -->
+<script src="js/vue.min.js"></script>
+<script>
+
+var app = new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                // visible: false,
+                isCollapse: false,
+                currentNav: 0,
+                activeName2: 'first',
+                pageNum: 1, 
+                currentPage: 1,
+                pageContent: '',
+                asideHeight: 300,
+                mainHeight: 300,
+                ifMenuShow: true,
+                zoomNum: '1.0',
+                textAlign: 'left',
+                zoomStyle: {},
+                pageDatas: ['<p><span style="font-family:DejaVu Sans;font-size:17.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:104.622719px;left:96.000000px"><nobr>Aashiq Parker </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:143.025391px;left:96.000000px"><nobr>Curriculum Vitae of Aashiq Parker </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:159.662674px;left:96.000000px"><nobr>Southern Suburbs, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#0000CC;"><span style="position:absolute;top:176.996017px;left:96.000000px"><nobr>aashiqp995@gmail.com </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:194.329346px;left:96.000000px"><nobr>+27 68 593 7559 </nobr></span></span></p><div style="position:absolute;top:266.000000px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00001.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:237.106689px;left:96.000000px"><nobr>Work Experience </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:275.862640px;left:96.000000px"><nobr>Quality Assurance </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:294.329346px;left:96.000000px"><nobr>icon africa - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:311.662689px;left:96.000000px"><nobr>March 2022 to Present </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:334.996002px;left:96.000000px"><nobr>My duties consist of: </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:352.329346px;left:96.000000px"><nobr>• Data capturing </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:369.662689px;left:96.000000px"><nobr>• Listening to calls &amp; identifying agents errors </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:386.996002px;left:96.000000px"><nobr>• Assuring quality of calls is correct </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:404.329346px;left:96.000000px"><nobr>• Reporting errors </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:421.662689px;left:96.000000px"><nobr>• Taking calls </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:438.995941px;left:96.000000px"><nobr>• Reaching daily targets </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:456.329254px;left:96.000000px"><nobr>• Ensuring KPIs are reached </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:473.662598px;left:96.000000px"><nobr>• Team development </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:508.329254px;left:96.000000px"><nobr>Reference: Hloni - (078) 814-1220 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:536.529297px;left:96.000000px"><nobr>Draughtsman </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:554.995911px;left:96.000000px"><nobr>Seventy30 design studio - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:572.329285px;left:96.000000px"><nobr>February 2020 to November 2020 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:595.662598px;left:96.000000px"><nobr>My responsibilities were to draw up floor plans, sections and elevations. I’ve learnt to meet deadlines </nobr></span><span style="position:absolute;top:612.995911px;left:96.000000px"><nobr>before the time to ensure that the client is happy with the result or if I have to make any other changes </nobr></span><span style="position:absolute;top:630.329285px;left:96.000000px"><nobr>before the deadline. </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:664.995911px;left:96.000000px"><nobr>Reference: Munsif - +27 (73) 424-3330 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:693.195984px;left:96.000000px"><nobr>Driver </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:711.662598px;left:96.000000px"><nobr>Change and effect - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:728.995911px;left:96.000000px"><nobr>January 2019 to October 2019 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:752.329285px;left:96.000000px"><nobr>My job was to drive workers to site and drop materials on site aswell. </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:786.995972px;left:96.000000px"><nobr>Reference: Asheraf - 0670624253 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:815.195984px;left:96.000000px"><nobr>Sales Promoter </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:833.662659px;left:96.000000px"><nobr>Atomic Marketing - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:850.995972px;left:96.000000px"><nobr>February 2019 to July 2019 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:874.329346px;left:96.000000px"><nobr>My responsibilities were introducing the new products to customers aswell as making sales. What I’ve </nobr></span><span style="position:absolute;top:891.662659px;left:96.000000px"><nobr>learnt while doing promoting work is that it helps a lot with communication skills as well as helped me </nobr></span></span></p>','<p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:92.996010px;left:96.000000px"><nobr>gain confidence needed to connect with customers. I learnt how to build a unique relationship with each </nobr></span><span style="position:absolute;top:110.329346px;left:96.000000px"><nobr>customer. </nobr></span></span></p><div style="position:absolute;top:182.000000px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00002.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:153.106689px;left:96.000000px"><nobr>Education </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:191.862625px;left:96.000000px"><nobr>Certificate in Web Developer/Designer </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:210.329346px;left:96.000000px"><nobr>Udemy - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:227.662674px;left:96.000000px"><nobr>January 2022 to August 2022 </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:255.862625px;left:96.000000px"><nobr>High School (matric) in Physics , Technical maths , Egd , civil engineering </nobr></span><span style="position:absolute;top:274.329346px;left:96.000000px"><nobr>High School (matric) - Cape Town, Western Cape </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:291.662689px;left:96.000000px"><nobr>January 2013 to December 2018 </nobr></span></span></p><div style="position:absolute;top:363.333344px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00003.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:334.440033px;left:96.000000px"><nobr>Skills </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:371.330658px;left:96.000000px"><nobr>• Driving (4 years) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:392.264008px;left:96.000000px"><nobr>• Microsoft Office (3 years) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:413.197327px;left:96.000000px"><nobr>• Draughtsman (3 years) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:434.130646px;left:96.000000px"><nobr>• Computer Hardware (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:455.063965px;left:96.000000px"><nobr>• HTML (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:475.997284px;left:96.000000px"><nobr>• HTML5 (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:496.930664px;left:96.000000px"><nobr>• CSS (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:517.864014px;left:96.000000px"><nobr>• Javascript (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:538.797302px;left:96.000000px"><nobr>• Bootstrap (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:559.730652px;left:96.000000px"><nobr>• UX (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:580.663940px;left:96.000000px"><nobr>• Figma (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:601.597351px;left:96.000000px"><nobr>• Photoshop (1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:622.530640px;left:96.000000px"><nobr>• Customer Service (Less than 1 year) </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:643.463989px;left:96.000000px"><nobr>• Excel (2 years) </nobr></span></span></p><div style="position:absolute;top:712.133301px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00004.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:683.239990px;left:96.000000px"><nobr>Languages </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:723.129333px;left:92.931992px"><nobr>• English - Expert </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:740.462646px;left:92.931992px"><nobr>• Afrikaans - Intermediate </nobr></span></span></p><div style="position:absolute;top:812.133301px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00005.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:783.239990px;left:96.000000px"><nobr>Links </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;text-decoration:underline;color:#0000CC;"><span style="position:absolute;top:823.129395px;left:96.000000px"><nobr><a href="https://portfolio-aashparker.vercel.app/" target="_blank">https://portfolio-aashparker.vercel.app/ </a></nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;text-decoration:underline;color:#0000CC;"><span style="position:absolute;top:852.462708px;left:96.000000px"><nobr><a href="https://www.udemy.com/certificate/UC-5c48de82-fce4-4cf0-9eee-69a29388efa3/" target="_blank">https://www.udemy.com/certificate/UC-5c48de82-fce4-4cf0-9eee-69a29388efa3/ </a></nobr></span></span></p>','<div style="position:absolute;top:124.666664px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00006.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:95.773354px;left:96.000000px"><nobr>Certifications and Licenses </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:10.500000px;font-weight:bold;color:#000000;"><span style="position:absolute;top:134.529297px;left:96.000000px"><nobr>Code 8 Drivers license </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:152.996017px;left:96.000000px"><nobr>2018 to 2026 </nobr></span></span></p><div style="position:absolute;top:224.666672px;left:94.666664px"><nobr><img height="3.000000" width="627.000000" src ="bgimg/bg00007.jpg"/></nobr></div><p><span style="font-family:DejaVu Sans;font-size:12.000000px;font-style:normal;font-weight:normal;color:#666666;"><span style="position:absolute;top:195.773361px;left:96.000000px"><nobr>Additional Information </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:235.662674px;left:96.000000px"><nobr>• Good communication skills  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:252.996017px;left:96.000000px"><nobr>• Good work ethic  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:270.329346px;left:96.000000px"><nobr>• Punctual  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:287.662689px;left:96.000000px"><nobr>• Self motivated  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:304.996002px;left:96.000000px"><nobr>• Administrative  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:322.329346px;left:96.000000px"><nobr>• Sales driven  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:339.662689px;left:96.000000px"><nobr>• Openness to experience  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:356.996002px;left:96.000000px"><nobr>• Humility  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:374.329346px;left:96.000000px"><nobr>• Responsible  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:391.662689px;left:96.000000px"><nobr>• Great attendance  </nobr></span></span></p><p><span style="font-family:DejaVu Sans;font-size:9.000000px;font-style:normal;font-weight:normal;color:#000000;"><span style="position:absolute;top:408.996002px;left:96.000000px"><nobr>• Tech Savy </nobr></span></span></p>']
+            }
+        },
+        mounted: function() {
+            this.$nextTick(function() {
+                this.pageNum = this.pageDatas.length;
+                this.pageContent = this.pageDatas[0];
+
+                this.setLeftMenuHeight();
+            })
+        },
+        watch: {
+            'currentPage': function(newVal, oldValue) {
+                // console.log('newVal ' + newVal, 'oldValue ' + oldValue);
+                if (newVal) {
+                    this.pageContent = this.pageDatas[this.currentPage - 1];
+                }
+            },
+            'zoomNum': function(newVal, oldValue) {
+                if (newVal) {
+                    this.zoomStyle = {
+                        'transform': 'scale(' + newVal + ')',
+                        '-webkit-transform': 'scale(' + newVal + ')',
+                        '-ms-transform': 'scale(' + newVal + ')',
+                        '-moz-transform': 'scale(' + newVal + ')',
+                        '-o-transform': 'scale(' + newVal + ')'
+                    }
+                }
+            }
+        },
+        methods: {
+            
+            changeCurrentPage: function(methods) {
+                switch (methods) {
+                    case 'first':
+                        this.currentPage = 1;
+                        break;
+                    case 'prev':
+                        if (this.currentPage > 1) {
+                            this.currentPage -= 1;
+                        }
+                        break;
+                    case 'next':
+                        if (this.currentPage < this.pageNum) {
+                            this.currentPage += 1;
+                        }
+                        break;
+                    case 'last':
+                        this.currentPage = this.pageNum;
+                        break;
+                }
+            },
+
+            gotoPage: function(page) {
+                console.log(page);
+                this.currentPage = page;
+            },
+            modifyZoom: function(type) {
+                switch (type) {
+                    case 'in':
+                        if (this.zoomNum < 2) {
+                            // this.zoomNum = (this.zoomNum + 0.1).toFixed(1);
+                            this.zoomNum = (parseFloat(this.zoomNum) + 0.1).toFixed(1);
+                        }
+                        break;
+                    case 'out':
+                        if (this.zoomNum > 0.5) {
+                            this.zoomNum = (parseFloat(this.zoomNum) - 0.1).toFixed(1);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                console.log(this.zoomNum);
+            },
+            setLeftMenuHeight: function() {
+                // this.asideHeight = document.body.scrollHeight - 60;
+                this.mainHeight = document.documentElement.clientHeight - 60 - 20;
+                // 60为头部导航高度， 46为menu高度， 40为上下padding
+                this.asideHeight = this.mainHeight - 20 - 46;
+            },
+            changePage: function(page) {
+                this.currentPage = page;
+                // this.pageContent = this.pageDatas[page - 1];
+            },
+            changeLeftMenu: function() {
+                this.ifMenuShow = !this.ifMenuShow;
+            }
+        }
+    });
+
+function gotoPage(page) {
+    console.log(page);
+    app.gotoPage(page);
+}
+
+</script>
+
+</html>
